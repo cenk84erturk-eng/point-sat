@@ -1,0 +1,459 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_POINT_SAT_API",
+      "label": "Point-Sat API",
+      "description": "Infinity datasource pointing at https://point-sat-api.onrender.com",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "yesoreyeram-infinity-datasource", "name": "Infinity", "version": "2.0.0" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "gauge", "name": "Gauge", "version": "" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "description": "LEO satellite pass time-series: delay, Doppler, az/el",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 20,
+      "title": "Pass Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 0, "y": 1 },
+      "id": 30,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Satellite",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=10",
+          "root_selector": "",
+          "columns": [{ "selector": "norad_id", "text": "NORAD", "type": "string" }]
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "ms",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 6, "y": 1 },
+      "id": 31,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["min"] } },
+      "title": "Min Delay (TCA)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=10",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "delay_ms", "text": "Delay", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "degree",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 12, "y": 1 },
+      "id": 32,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["max"] } },
+      "title": "Max Elevation",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=10",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "el_deg", "text": "Elevation", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "kHz",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 50 },
+            { "color": "red", "value": 100 }
+          ]}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 18, "y": 1 },
+      "id": 33,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["max"] } },
+      "title": "Peak |Doppler|",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=10",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "doppler_khz", "text": "Doppler", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
+      "id": 21,
+      "title": "Link Budget Time Series",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 1,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "title": "One-Way Propagation Delay",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=${step_sec}",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "delay_ms", "text": "Delay (ms)", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "kHz",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "thresholdsStyle": { "mode": "off" }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Doppler (kHz)" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "semi-dark-red", "mode": "fixed" } }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 2,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "title": "Doppler Shift",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=${step_sec}",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "doppler_khz", "text": "Doppler (kHz)", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "id": 22,
+      "title": "Pointing Angles",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "degree",
+          "min": 0,
+          "max": 90
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "id": 3,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "title": "Elevation Angle",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=${step_sec}",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "el_deg", "text": "Elevation (°)", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "degree",
+          "min": 0,
+          "max": 360
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "id": 4,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none", "sortBy": "" }
+      },
+      "title": "Azimuth Angle",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=${step_sec}",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "az_deg", "text": "Azimuth (°)", "type": "number" }
+          ]
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "id": 23,
+      "title": "Range",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "yesoreyream-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "lengthkm"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Range Rate (km/s)" },
+            "properties": [
+              { "id": "unit", "value": "velocityKms" },
+              { "id": "custom.axisPlacement", "value": "right" }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 23 },
+      "id": 5,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "title": "Slant Range & Range Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "${DS_POINT_SAT_API}" },
+          "refId": "A",
+          "type": "json",
+          "url": "${API_URL}/api/pass/timeseries?lat=${lat}&lon=${lon}&alt=${alt}&freq_ghz=${freq_ghz}&norad_id=${norad_id}&aos=${aos}&los=${los}&step_sec=${step_sec}",
+          "root_selector": "",
+          "columns": [
+            { "selector": "t", "text": "Time", "type": "timestamp_epoch_s" },
+            { "selector": "range_km", "text": "Range (km)", "type": "number" },
+            { "selector": "range_rate_kms", "text": "Range Rate (km/s)", "type": "number" }
+          ]
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["satellite", "leo", "point-sat"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "https://point-sat-api.onrender.com", "value": "https://point-sat-api.onrender.com" },
+        "hide": 0,
+        "label": "API URL",
+        "name": "API_URL",
+        "options": [{ "selected": true, "text": "https://point-sat-api.onrender.com", "value": "https://point-sat-api.onrender.com" }],
+        "query": "https://point-sat-api.onrender.com",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "39.9208", "value": "39.9208" },
+        "hide": 0,
+        "label": "Latitude",
+        "name": "lat",
+        "options": [{ "selected": true, "text": "39.9208", "value": "39.9208" }],
+        "query": "39.9208",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "32.8541", "value": "32.8541" },
+        "hide": 0,
+        "label": "Longitude",
+        "name": "lon",
+        "options": [{ "selected": true, "text": "32.8541", "value": "32.8541" }],
+        "query": "32.8541",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "938", "value": "938" },
+        "hide": 0,
+        "label": "Altitude (m)",
+        "name": "alt",
+        "options": [{ "selected": true, "text": "938", "value": "938" }],
+        "query": "938",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "11.7", "value": "11.7" },
+        "hide": 0,
+        "label": "Frequency (GHz)",
+        "name": "freq_ghz",
+        "options": [{ "selected": true, "text": "11.7", "value": "11.7" }],
+        "query": "11.7",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "48000", "value": "48000" },
+        "hide": 0,
+        "label": "NORAD ID",
+        "name": "norad_id",
+        "options": [{ "selected": true, "text": "48000", "value": "48000" }],
+        "query": "48000",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "2026-05-26T19:00:00Z", "value": "2026-05-26T19:00:00Z" },
+        "hide": 0,
+        "label": "AOS (ISO UTC)",
+        "name": "aos",
+        "options": [{ "selected": true, "text": "2026-05-26T19:00:00Z", "value": "2026-05-26T19:00:00Z" }],
+        "query": "2026-05-26T19:00:00Z",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "2026-05-26T19:10:00Z", "value": "2026-05-26T19:10:00Z" },
+        "hide": 0,
+        "label": "LOS (ISO UTC)",
+        "name": "los",
+        "options": [{ "selected": true, "text": "2026-05-26T19:10:00Z", "value": "2026-05-26T19:10:00Z" }],
+        "query": "2026-05-26T19:10:00Z",
+        "type": "textbox"
+      },
+      {
+        "current": { "selected": false, "text": "5", "value": "5" },
+        "hide": 0,
+        "label": "Step (sec)",
+        "name": "step_sec",
+        "options": [
+          { "selected": false, "text": "1", "value": "1" },
+          { "selected": false, "text": "5", "value": "5" },
+          { "selected": true, "text": "10", "value": "10" },
+          { "selected": false, "text": "30", "value": "30" }
+        ],
+        "query": "1,5,10,30",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now+2h" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Point-Sat — Pass Time Series",
+  "uid": "point-sat-pass-ts",
+  "version": 1
+}
