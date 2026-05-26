@@ -108,7 +108,6 @@ function processConstellation(
     latitude: satellite.degreesToRadians(station.lat),
     height: station.alt / 1000,
   }
-  const startDate = new Date(startMs)
 
   for (const tle of tles) {
     const satrec = satellite.twoline2satrec(tle.line1, tle.line2)
