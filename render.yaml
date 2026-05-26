@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: point-sat-api
+    runtime: python
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATA_DIR
+        value: ../web/public/data
+
+  - type: static
+    name: point-sat-web
+    rootDir: web
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=300
+      - path: /data/*
+        name: Cache-Control
+        value: public, max-age=14400

@@ -1,0 +1,14 @@
+web/node_modules/
+web/dist/
+web/.env*
+api/__pycache__/
+api/.venv/
+api/venv/
+api/*.pyc
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.egg-info/
+dist/
+.python-version
