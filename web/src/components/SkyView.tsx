@@ -1,4 +1,5 @@
 import type { Pass } from '../types'
+import { livePosition } from '../utils/interpolate'
 
 const R = 150          // SVG radius for el=0 (horizon)
 const CX = 170         // SVG center X
@@ -30,9 +31,10 @@ interface Props {
   passes: Pass[]
   selectedPass: Pass | null
   onSelectPass: (id: string) => void
+  nowMs: number
 }
 
-export function SkyView({ passes, selectedPass, onSelectPass }: Props) {
+export function SkyView({ passes, selectedPass, onSelectPass, nowMs }: Props) {
   const elevRings = [0, 30, 60]
   const cardinals = [
     { az: 0,   label: 'N' },
@@ -145,6 +147,21 @@ export function SkyView({ passes, selectedPass, onSelectPass }: Props) {
             </g>
           )
         })}
+
+        {/* Live satellite position on selected pass */}
+        {selectedPass && (() => {
+          const pos = livePosition(selectedPass.samples, nowMs)
+          if (!pos) return null
+          const [lx, ly] = toXY(pos.az, pos.el)
+          const color = CONSTELLATION_COLORS[selectedPass.constellation] ?? '#fff'
+          return (
+            <g>
+              <circle cx={lx} cy={ly} r={6} fill={color} opacity={0.25} />
+              <circle cx={lx} cy={ly} r={4} fill={color} opacity={0.9} />
+              <circle cx={lx} cy={ly} r={4} fill="none" stroke="#fff" strokeWidth="1" opacity={0.7} />
+            </g>
+          )
+        })()}
 
         {/* Zenith dot */}
         <circle cx={CX} cy={CY} r={2} fill="#1e2d4a" />

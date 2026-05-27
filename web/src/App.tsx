@@ -9,17 +9,26 @@ import { ControlPanel } from './components/ControlPanel'
 import { PassCharts } from './components/PassCharts'
 import type { Station, PassSettings, Pass } from './types'
 
-function useAge(date: Date | null): string {
-  const [, setTick] = useState(0)
+function useNow(intervalMs = 1000): number {
+  const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
-    const id = setInterval(() => setTick(n => n + 1), 30_000)
+    const id = setInterval(() => setNow(Date.now()), intervalMs)
     return () => clearInterval(id)
-  }, [])
+  }, [intervalMs])
+  return now
+}
+
+function useAge(date: Date | null, nowMs: number): string {
   if (!date) return ''
-  const s = Math.floor((Date.now() - date.getTime()) / 1000)
-  if (s < 60)  return 'just now'
+  const s = Math.floor((nowMs - date.getTime()) / 1000)
+  if (s < 60)   return 'just now'
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ago`
+}
+
+function fmtUtc(ms: number): string {
+  const d = new Date(ms)
+  return d.toUTCString().slice(17, 25) + ' UTC'
 }
 
 const DEFAULT_SETTINGS: PassSettings = {
@@ -42,8 +51,9 @@ export default function App() {
     [passes, selectedPassId]
   )
 
+  const nowMs = useNow()
   const totalSats = counts.starlink + counts.oneweb + counts.kuiper
-  const tleAge = useAge(fetchedAt)
+  const tleAge = useAge(fetchedAt, nowMs)
 
   return (
     <div className="app">
@@ -54,6 +64,8 @@ export default function App() {
           <span className="subtitle">LEO Constellation Pass Predictor</span>
         </div>
         <div className="header-status">
+          <span className="status-chip status-chip--clock">{fmtUtc(nowMs)}</span>
+
           {tlesError && <span className="status-chip status-chip--error">TLE error</span>}
 
           {tlesLoading
@@ -95,11 +107,14 @@ export default function App() {
           passes={passes}
           selectedPassId={selectedPassId}
           onSelectPass={setSelectedPassId}
+          selectedPass={selectedPass}
+          nowMs={nowMs}
         />
         <SkyView
           passes={passes}
           selectedPass={selectedPass}
           onSelectPass={setSelectedPassId}
+          nowMs={nowMs}
         />
       </main>
 
@@ -107,6 +122,7 @@ export default function App() {
         <PassCharts
           pass={selectedPass}
           freqGHz={settings.freqGHz}
+          nowMs={nowMs}
         />
       )}
 

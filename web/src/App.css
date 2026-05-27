@@ -103,6 +103,7 @@ body {
 .status-chip--loading { color: var(--accent-starlink); border-color: rgba(76,158,255,0.3); }
 .status-chip--error   { color: var(--accent-red);      border-color: rgba(239,68,68,0.3); }
 .status-chip--warn    { color: var(--accent-yellow);   border-color: rgba(245,158,11,0.3); }
+.status-chip--clock   { color: var(--text-secondary);  letter-spacing: 0.04em; }
 
 .status-icon {
   font-size: 8px;

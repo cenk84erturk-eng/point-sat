@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, Circle, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, Circle, CircleMarker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { Pass, Station } from '../types'
+import { livePosition } from '../utils/interpolate'
 
 // Fix Leaflet marker icons in Vite
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
@@ -51,9 +52,11 @@ interface Props {
   passes: Pass[]
   selectedPassId: string | null
   onSelectPass: (id: string) => void
+  selectedPass: Pass | null
+  nowMs: number
 }
 
-export function MapView({ station, onStationChange, passes, selectedPassId, onSelectPass }: Props) {
+export function MapView({ station, onStationChange, passes, selectedPassId, onSelectPass, selectedPass, nowMs }: Props) {
   const handlePlace = (lat: number, lon: number) => {
     onStationChange({ lat: parseFloat(lat.toFixed(4)), lon: parseFloat(lon.toFixed(4)), alt: 0 })
   }
@@ -88,6 +91,19 @@ export function MapView({ station, onStationChange, passes, selectedPassId, onSe
             />
           </>
         )}
+
+        {/* Live satellite position */}
+        {selectedPass && (() => {
+          const pos = livePosition(selectedPass.samples, nowMs)
+          const color = CONSTELLATION_COLORS[selectedPass.constellation] ?? '#fff'
+          return pos ? (
+            <CircleMarker
+              center={[pos.satLat, pos.satLon]}
+              radius={6}
+              pathOptions={{ color: '#fff', fillColor: color, fillOpacity: 1, weight: 2 }}
+            />
+          ) : null
+        })()}
 
         {passes.slice(0, 30).map(pass => {
           const color = CONSTELLATION_COLORS[pass.constellation] ?? '#888'

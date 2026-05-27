@@ -37,9 +37,10 @@ interface ChartProps {
   values: number[]
   times: number[]   // seconds from AOS
   color: string
+  nowSec?: number   // seconds from AOS for the live cursor
 }
 
-function LineChart({ label, unit, values, times, color }: ChartProps) {
+function LineChart({ label, unit, values, times, color, nowSec }: ChartProps) {
   const [tMin, tMax] = minmax(times)
   const [vMin, vMax] = minmax(values)
   const vPad = (vMax - vMin) * 0.1 || 1
@@ -104,6 +105,19 @@ function LineChart({ label, unit, values, times, color }: ChartProps) {
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5"
         strokeLinejoin="round" strokeLinecap="round" />
 
+      {/* live cursor */}
+      {nowSec !== undefined && nowSec >= tMin && nowSec <= tMax && (() => {
+        const cx = xScale(nowSec)
+        return (
+          <g>
+            <line x1={cx} y1={PAD.top} x2={cx} y2={PAD.top + PH}
+              stroke="#ffffff" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+            <circle cx={cx} cy={yScale(values[Math.round((nowSec - tMin) / (tMax - tMin) * (values.length - 1))] ?? values[0])}
+              r="3" fill="#ffffff" opacity="0.85" />
+          </g>
+        )
+      })()}
+
       {/* label */}
       <text x={PAD.left + 4} y={PAD.top + 12} fontSize="9" fontWeight="600"
         fill="#8899b8" letterSpacing="0.05em">
@@ -116,13 +130,15 @@ function LineChart({ label, unit, values, times, color }: ChartProps) {
 interface Props {
   pass: Pass
   freqGHz: number
+  nowMs: number
 }
 
-export function PassCharts({ pass, freqGHz }: Props) {
+export function PassCharts({ pass, freqGHz, nowMs }: Props) {
   const { samples, constellation, sat, aos } = pass
   if (samples.length < 2) return null
 
   const color = COLORS[constellation] ?? '#4c9eff'
+  const nowSec = (nowMs - aos) / 1000
   const C_KM_S = 299792.458
   const times = samples.map(s => (s.t - aos) / 1000)
   const delays = samples.map(s => s.delayMs)
@@ -169,36 +185,36 @@ export function PassCharts({ pass, freqGHz }: Props) {
         {/* Row 1 */}
         <div className="pass-chart-wrap">
           <LineChart label="Delay" unit="ms"
-            values={delays} times={times} color={color} />
+            values={delays} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap">
           <LineChart label="Doppler" unit="ppm"
-            values={dopplerPpm} times={times} color={color} />
+            values={dopplerPpm} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap">
           <LineChart label="Elevation" unit="°"
-            values={elevations} times={times} color={color} />
+            values={elevations} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap">
           <LineChart label="Azimuth" unit="°"
-            values={azimuths} times={times} color={color} />
+            values={azimuths} times={times} color={color} nowSec={nowSec} />
         </div>
         {/* Row 2 */}
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Delay rate" unit="µs/s"
-            values={delayRoc} times={times} color={color} />
+            values={delayRoc} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Doppler rate" unit="ppm/s"
-            values={dopplerRoc} times={times} color={color} />
+            values={dopplerRoc} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Elevation rate" unit="°/s"
-            values={elevRoc} times={times} color={color} />
+            values={elevRoc} times={times} color={color} nowSec={nowSec} />
         </div>
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Azimuth rate" unit="°/s"
-            values={azRoc} times={times} color={color} />
+            values={azRoc} times={times} color={color} nowSec={nowSec} />
         </div>
       </div>
     </div>
