@@ -155,6 +155,7 @@ export function PassCharts({ pass, freqGHz }: Props) {
         </span>
       </div>
       <div className="pass-charts-grid">
+        {/* Row 1 */}
         <div className="pass-chart-wrap">
           <LineChart label="Delay" unit="ms"
             values={delays} times={times} color={color} />
@@ -163,17 +164,18 @@ export function PassCharts({ pass, freqGHz }: Props) {
           <LineChart label="Doppler" unit="ppm"
             values={dopplerPpm} times={times} color={color} />
         </div>
-        <div className="pass-chart-wrap pass-chart-wrap--roc">
+        <div className="pass-chart-wrap">
+          <LineChart label="Elevation" unit="°"
+            values={elevations} times={times} color={color} />
+        </div>
+        {/* Row 2 */}
+        <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Delay rate" unit="ms/s"
             values={delayRoc} times={times} color={color} />
         </div>
-        <div className="pass-chart-wrap pass-chart-wrap--roc">
+        <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Doppler rate" unit="ppm/s"
             values={dopplerRoc} times={times} color={color} />
-        </div>
-        <div className="pass-chart-wrap pass-chart-wrap--last">
-          <LineChart label="Elevation" unit="°"
-            values={elevations} times={times} color={color} />
         </div>
         <div className="pass-chart-wrap pass-chart-wrap--last">
           <LineChart label="Azimuth" unit="°"

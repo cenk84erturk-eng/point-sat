@@ -331,7 +331,7 @@ tbody td {
 
 .pass-charts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: auto auto;
 }
 
@@ -340,8 +340,8 @@ tbody td {
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-/* right column: no right border */
-.pass-chart-wrap:nth-child(even) {
+/* third column: no right border */
+.pass-chart-wrap:nth-child(3n) {
   border-right: none;
 }
 /* last row: no bottom border */
