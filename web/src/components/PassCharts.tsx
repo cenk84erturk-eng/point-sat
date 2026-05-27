@@ -143,6 +143,17 @@ export function PassCharts({ pass, freqGHz }: Props) {
   const elevations = samples.map(s => s.el)
   const azimuths   = samples.map(s => s.az)
 
+  function centralDiff(vals: number[], ts: number[]): number[] {
+    return vals.map((_v, i) => {
+      if (i === 0)              return (vals[1] - vals[0]) / ((ts[1] - ts[0]) || 1)
+      if (i === vals.length - 1) return (vals[i] - vals[i - 1]) / ((ts[i] - ts[i - 1]) || 1)
+      return (vals[i + 1] - vals[i - 1]) / ((ts[i + 1] - ts[i - 1]) || 1)
+    })
+  }
+
+  const elevRoc = centralDiff(elevations, times)
+  const azRoc   = centralDiff(azimuths,   times)
+
   return (
     <div className="pass-charts">
       <div className="pass-charts-header">
@@ -168,6 +179,10 @@ export function PassCharts({ pass, freqGHz }: Props) {
           <LineChart label="Elevation" unit="°"
             values={elevations} times={times} color={color} />
         </div>
+        <div className="pass-chart-wrap">
+          <LineChart label="Azimuth" unit="°"
+            values={azimuths} times={times} color={color} />
+        </div>
         {/* Row 2 */}
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
           <LineChart label="Delay rate" unit="ms/s"
@@ -177,9 +192,13 @@ export function PassCharts({ pass, freqGHz }: Props) {
           <LineChart label="Doppler rate" unit="ppm/s"
             values={dopplerRoc} times={times} color={color} />
         </div>
-        <div className="pass-chart-wrap pass-chart-wrap--last">
-          <LineChart label="Azimuth" unit="°"
-            values={azimuths} times={times} color={color} />
+        <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
+          <LineChart label="Elevation rate" unit="°/s"
+            values={elevRoc} times={times} color={color} />
+        </div>
+        <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
+          <LineChart label="Azimuth rate" unit="°/s"
+            values={azRoc} times={times} color={color} />
         </div>
       </div>
     </div>
