@@ -31,7 +31,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-rows: 48px 44px 1fr 220px;
+  grid-template-rows: 48px 44px 1fr auto 220px;
   height: 100vh;
   overflow: hidden;
 }
@@ -287,4 +287,58 @@ tbody td {
   color: var(--text-muted);
   font-size: 12px;
   text-align: center;
+}
+
+/* ── Pass Charts ── */
+.pass-charts {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.pass-charts-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pass-charts-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pass-charts-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.const-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.const-dot.const-starlink { background: var(--accent-starlink); }
+.const-dot.const-oneweb   { background: var(--accent-oneweb); }
+.const-dot.const-kuiper   { background: var(--accent-kuiper); }
+
+.pass-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.pass-chart-wrap {
+  padding: 6px 12px 4px;
+  border-right: 1px solid var(--border);
+}
+.pass-chart-wrap:last-child {
+  border-right: none;
 }

@@ -6,6 +6,7 @@ import { MapView } from './components/MapView'
 import { SkyView } from './components/SkyView'
 import { ContactList } from './components/ContactList'
 import { ControlPanel } from './components/ControlPanel'
+import { PassCharts } from './components/PassCharts'
 import type { Station, PassSettings, Pass } from './types'
 
 const DEFAULT_SETTINGS: PassSettings = {
@@ -77,6 +78,13 @@ export default function App() {
           onSelectPass={setSelectedPassId}
         />
       </main>
+
+      {selectedPass && (
+        <PassCharts
+          pass={selectedPass}
+          freqGHz={settings.freqGHz[selectedPass.constellation]}
+        />
+      )}
 
       <ContactList
         passes={passes}
