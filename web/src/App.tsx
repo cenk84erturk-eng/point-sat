@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import './App.css'
 import { useTLEs } from './hooks/useTLEs'
 import { usePasses } from './hooks/usePasses'
@@ -8,6 +8,19 @@ import { ContactList } from './components/ContactList'
 import { ControlPanel } from './components/ControlPanel'
 import { PassCharts } from './components/PassCharts'
 import type { Station, PassSettings, Pass } from './types'
+
+function useAge(date: Date | null): string {
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick(n => n + 1), 30_000)
+    return () => clearInterval(id)
+  }, [])
+  if (!date) return ''
+  const s = Math.floor((Date.now() - date.getTime()) / 1000)
+  if (s < 60)  return 'just now'
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ago`
+}
 
 const DEFAULT_SETTINGS: PassSettings = {
   windowMin: 90,
@@ -21,7 +34,7 @@ export default function App() {
   const [settings, setSettings] = useState<PassSettings>(DEFAULT_SETTINGS)
   const [selectedPassId, setSelectedPassId] = useState<string | null>(null)
 
-  const { tles, loading: tlesLoading, error: tlesError, counts } = useTLEs()
+  const { tles, loading: tlesLoading, error: tlesError, counts, fetchedAt } = useTLEs()
   const { passes, loading: passesLoading, progress } = usePasses(station, tles, settings)
 
   const selectedPass: Pass | null = useMemo(
@@ -30,6 +43,7 @@ export default function App() {
   )
 
   const totalSats = counts.starlink + counts.oneweb + counts.kuiper
+  const tleAge = useAge(fetchedAt)
 
   return (
     <div className="app">
@@ -40,20 +54,30 @@ export default function App() {
           <span className="subtitle">LEO Constellation Pass Predictor</span>
         </div>
         <div className="header-status">
-          {tlesLoading && <span className="badge loading">Loading TLEs…</span>}
-          {tlesError && <span className="badge error">TLE error</span>}
-          {!tlesLoading && !tlesError && totalSats > 0 && (
-            <span className="badge ok">{totalSats.toLocaleString()} satellites loaded</span>
-          )}
-          {!tlesLoading && !tlesError && totalSats === 0 && (
-            <span className="badge warn">No TLE data — run scripts/fetch_tles.py</span>
-          )}
-          {passesLoading && (
-            <span className="badge loading">Computing {progress ?? 'passes'}…</span>
-          )}
-          {!passesLoading && station && passes.length > 0 && (
-            <span className="badge ok">{passes.length} upcoming contact{passes.length !== 1 ? 's' : ''}</span>
-          )}
+          {tlesError && <span className="status-chip status-chip--error">TLE error</span>}
+
+          {tlesLoading
+            ? <span className="status-chip status-chip--loading">Loading TLEs…</span>
+            : totalSats > 0
+              ? <span className="status-chip" title={fetchedAt?.toUTCString()}>
+                  <span className="status-icon">&#9670;</span>
+                  {totalSats.toLocaleString()} sats
+                  {tleAge && <span className="status-age"> · {tleAge}</span>}
+                </span>
+              : <span className="status-chip status-chip--warn">No TLE data</span>
+          }
+
+          {passesLoading
+            ? <span className="status-chip status-chip--loading">
+                Computing {progress ?? 'passes'}…
+              </span>
+            : station
+              ? <span className="status-chip">
+                  <span className="status-icon">&#9711;</span>
+                  {passes.length} contact{passes.length !== 1 ? 's' : ''}
+                </span>
+              : null
+          }
         </div>
       </header>
 

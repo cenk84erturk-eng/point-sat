@@ -8,6 +8,7 @@ export function useTLEs() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [counts, setCounts] = useState<Counts>({ starlink: 0, oneweb: 0, kuiper: 0 })
+  const [fetchedAt, setFetchedAt] = useState<Date | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -16,14 +17,16 @@ export function useTLEs() {
       setError(null)
       try {
         const bust = `?v=${__BUILD_TIME__}`
-        const [starlink, oneweb, kuiper] = await Promise.all([
+        const [starlink, oneweb, kuiper, meta] = await Promise.all([
           fetch(`/data/starlink.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
           fetch(`/data/oneweb.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
           fetch(`/data/kuiper.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
+          fetch(`/data/meta.json${bust}`, { cache: 'no-cache' }).then(r => r.json()).catch(() => null),
         ])
         if (cancelled) return
         setTles({ starlink, oneweb, kuiper })
         setCounts({ starlink: starlink.length, oneweb: oneweb.length, kuiper: kuiper.length })
+        if (meta?.fetchedAt) setFetchedAt(new Date(meta.fetchedAt))
       } catch (err) {
         if (!cancelled) setError(String(err))
       } finally {
@@ -34,5 +37,5 @@ export function useTLEs() {
     return () => { cancelled = true }
   }, [])
 
-  return { tles, loading, error, counts }
+  return { tles, loading, error, counts, fetchedAt }
 }

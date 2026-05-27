@@ -73,10 +73,46 @@ body {
   letter-spacing: 0.03em;
 }
 
-.badge.ok      { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+.badge.ok      { background: rgba(34,197,94,0.15);  color: var(--accent-green); }
 .badge.loading { background: rgba(76,158,255,0.15); color: var(--accent-starlink); }
-.badge.error   { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.badge.error   { background: rgba(239,68,68,0.15);  color: var(--accent-red); }
 .badge.warn    { background: rgba(245,158,11,0.15); color: var(--accent-yellow); }
+
+/* ── Header status chips ── */
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.status-chip--loading { color: var(--accent-starlink); border-color: rgba(76,158,255,0.3); }
+.status-chip--error   { color: var(--accent-red);      border-color: rgba(239,68,68,0.3); }
+.status-chip--warn    { color: var(--accent-yellow);   border-color: rgba(245,158,11,0.3); }
+
+.status-icon {
+  font-size: 8px;
+  color: var(--accent-green);
+}
+
+.status-age {
+  color: var(--text-muted);
+  font-weight: 400;
+}
 
 /* ── Control Panel ── */
 .control-panel {

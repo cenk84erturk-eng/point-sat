@@ -3,6 +3,7 @@
 import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
@@ -64,17 +65,29 @@ def fetch_group(group_key: str, celestrak_group: str) -> int:
 def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Fetching TLEs from CelesTrak → {DATA_DIR}")
-    total = 0
+    counts: dict[str, int] = {}
     for key, grp in GROUPS.items():
         try:
             n = fetch_group(key, grp)
-            total += n
+            if n >= 0:
+                counts[key] = n
+            else:
+                # cache-hit: read existing count
+                fp = DATA_DIR / f"{key}.json"
+                counts[key] = len(json.loads(fp.read_text())) if fp.exists() else 0
         except requests.HTTPError as e:
             print(f"  {key}: HTTP error {e.response.status_code} — skipping", file=sys.stderr)
         except Exception as e:
             print(f"  {key}: error — {e}", file=sys.stderr)
         time.sleep(0.5)  # be polite to CelesTrak
-    print(f"Done. {total} total satellites.")
+
+    # Write meta.json so the frontend can show TLE freshness
+    meta = {
+        "fetchedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "counts": counts,
+    }
+    (DATA_DIR / "meta.json").write_text(json.dumps(meta, indent=2))
+    print(f"Done. {sum(counts.values())} total satellites. meta.json written.")
 
 
 if __name__ == "__main__":
