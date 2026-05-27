@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, Polygon, CircleMarker, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, CircleMarker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { Pass, Station } from '../types'
@@ -19,23 +19,42 @@ const CONSTELLATION_COLORS: Record<string, string> = {
   kuiper:   '#a855f7',
 }
 
-// Coverage footprint for the given minimum elevation angle.
-// Drawn as a flat lat/lon ellipse (equal degrees in each direction) so that
-// Mercator's latitude stretch makes it appear as a visible oval — taller than
-// wide at higher latitudes, circular at the equator — rather than a conformal
-// circle which always looks round on Mercator regardless of latitude.
-function elevationFootprint(lat: number, lon: number, minElDeg: number, altKm = 550): [number, number][] {
+// Geodesic coverage ring: all ground points that see a satellite at exactly
+// minElDeg elevation for the given orbit altitude. Uses the spherical
+// destination formula so the ring is geometrically correct in all directions.
+// Returns multiple segments already split at the antimeridian.
+function elevationFootprint(lat: number, lon: number, minElDeg: number, altKm = 550): [number, number][][] {
   const Re = 6371
   const ε = minElDeg * Math.PI / 180
-  const η = Math.asin(Re * Math.cos(ε) / (Re + altKm))
-  // Earth central angle in degrees
-  const ρ = ((Math.PI / 2 - ε - η) * 180) / Math.PI
+  const η = Math.asin((Re * Math.cos(ε)) / (Re + altKm))
+  const ρ = Math.PI / 2 - ε - η          // Earth central angle, radians
+  const φ = lat * Math.PI / 180
+  const λ = lon * Math.PI / 180
   const pts: [number, number][] = []
   for (let i = 0; i <= 360; i++) {
     const θ = (i * Math.PI) / 180
-    pts.push([lat + ρ * Math.cos(θ), lon + ρ * Math.sin(θ)])
+    const lat2 = Math.asin(
+      Math.sin(φ) * Math.cos(ρ) + Math.cos(φ) * Math.sin(ρ) * Math.cos(θ)
+    )
+    const lon2 =
+      λ + Math.atan2(
+        Math.sin(θ) * Math.sin(ρ) * Math.cos(φ),
+        Math.cos(ρ) - Math.sin(φ) * Math.sin(lat2)
+      )
+    pts.push([lat2 * 180 / Math.PI, (lon2 * 180 / Math.PI + 540) % 360 - 180])
   }
-  return pts
+  // split at antimeridian
+  const segs: [number, number][][] = []
+  let cur: [number, number][] = [pts[0]]
+  for (let i = 1; i < pts.length; i++) {
+    if (Math.abs(pts[i][1] - pts[i - 1][1]) > 180) {
+      segs.push(cur)
+      cur = []
+    }
+    cur.push(pts[i])
+  }
+  segs.push(cur)
+  return segs.filter(s => s.length > 1)
 }
 
 function splitAtAntimeridian(pts: [number, number][]): [number, number][][] {
@@ -104,11 +123,13 @@ export function MapView({ station, onStationChange, passes, selectedPassId, onSe
         {station && (
           <>
             <Marker position={[station.lat, station.lon]} />
-            <Polygon
-              key={`fp-${station.lat}-${station.lon}-${minElDeg}`}
-              positions={elevationFootprint(station.lat, station.lon, minElDeg)}
-              pathOptions={{ color: '#4c9eff', fillColor: '#4c9eff', fillOpacity: 0.04, weight: 1, opacity: 0.35 }}
-            />
+            {elevationFootprint(station.lat, station.lon, minElDeg).map((seg, si) => (
+              <Polyline
+                key={`fp-${station.lat}-${station.lon}-${minElDeg}-${si}`}
+                positions={seg}
+                pathOptions={{ color: '#4c9eff', weight: 1.5, opacity: 0.55, dashArray: '6 5' }}
+              />
+            ))}
           </>
         )}
 
