@@ -19,21 +19,21 @@ const CONSTELLATION_COLORS: Record<string, string> = {
   kuiper:   '#a855f7',
 }
 
-// Compute the geodesic polygon for minimum elevation angle coverage.
-// At elevation ε the Earth central angle ρ satisfies: sin(η)=Re·cos(ε)/(Re+h), ρ=90°-ε-η
+// Coverage footprint for the given minimum elevation angle.
+// Drawn as a flat lat/lon ellipse (equal degrees in each direction) so that
+// Mercator's latitude stretch makes it appear as a visible oval — taller than
+// wide at higher latitudes, circular at the equator — rather than a conformal
+// circle which always looks round on Mercator regardless of latitude.
 function elevationFootprint(lat: number, lon: number, minElDeg: number, altKm = 550): [number, number][] {
   const Re = 6371
   const ε = minElDeg * Math.PI / 180
   const η = Math.asin(Re * Math.cos(ε) / (Re + altKm))
-  const ρ = Math.PI / 2 - ε - η
-  const φ = lat * Math.PI / 180
-  const λ = lon * Math.PI / 180
+  // Earth central angle in degrees
+  const ρ = ((Math.PI / 2 - ε - η) * 180) / Math.PI
   const pts: [number, number][] = []
   for (let i = 0; i <= 360; i++) {
     const θ = (i * Math.PI) / 180
-    const lat2 = Math.asin(Math.sin(φ) * Math.cos(ρ) + Math.cos(φ) * Math.sin(ρ) * Math.cos(θ))
-    const lon2 = λ + Math.atan2(Math.sin(θ) * Math.sin(ρ) * Math.cos(φ), Math.cos(ρ) - Math.sin(φ) * Math.sin(lat2))
-    pts.push([lat2 * 180 / Math.PI, lon2 * 180 / Math.PI])
+    pts.push([lat + ρ * Math.cos(θ), lon + ρ * Math.sin(θ)])
   }
   return pts
 }
