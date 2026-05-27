@@ -114,22 +114,18 @@ export function ControlPanel({ station, settings, onSettingsChange, onStationCha
 
       <div className="control-group">
         <span className="control-label">Freq (GHz)</span>
-        {CONSTELLATIONS.map(({ key }) => (
-          <input
-            key={key}
-            className="control-input"
-            type="number"
-            style={{ width: 60 }}
-            value={settings.freqGHz[key]}
-            onChange={e => {
-              const v = parseFloat(e.target.value)
-              if (!isNaN(v) && v > 0)
-                onSettingsChange({ ...settings, freqGHz: { ...settings.freqGHz, [key]: v } })
-            }}
-            step="0.1" min="0.1" max="100"
-            title={`${key} carrier frequency`}
-          />
-        ))}
+        <input
+          className="control-input"
+          type="number"
+          style={{ width: 70 }}
+          value={settings.freqGHz}
+          onChange={e => {
+            const v = parseFloat(e.target.value)
+            if (!isNaN(v) && v > 0) onSettingsChange({ ...settings, freqGHz: v })
+          }}
+          step="0.5" min="0.1" max="100"
+          title="Carrier frequency for Doppler calculation"
+        />
       </div>
     </div>
   )

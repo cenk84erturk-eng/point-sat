@@ -216,7 +216,7 @@ addEventListener('message', (e: MessageEvent<WorkerInMessage>) => {
 
     const passes = processConstellation(
       consTles, constellation, station,
-      startTime, windowMs, minElDeg, freqGHz[constellation]
+      startTime, windowMs, minElDeg, freqGHz
     )
     allPasses.push(...passes)
     postMessage({ type: 'PROGRESS', constellation, found: passes.length })

@@ -23,10 +23,10 @@ function useAge(date: Date | null): string {
 }
 
 const DEFAULT_SETTINGS: PassSettings = {
-  windowMin: 90,
-  minElDeg: 10,
+  windowMin: 10,
+  minElDeg: 30,
   activeConstellations: ['starlink', 'oneweb', 'kuiper'],
-  freqGHz: { starlink: 11.7, oneweb: 11.5, kuiper: 19.5 },
+  freqGHz: 20.0,
 }
 
 export default function App() {
@@ -106,7 +106,7 @@ export default function App() {
       {selectedPass && (
         <PassCharts
           pass={selectedPass}
-          freqGHz={settings.freqGHz[selectedPass.constellation]}
+          freqGHz={settings.freqGHz}
         />
       )}
 

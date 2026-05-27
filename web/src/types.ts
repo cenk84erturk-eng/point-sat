@@ -48,7 +48,7 @@ export interface PassSettings {
   windowMin: number;
   minElDeg: number;
   activeConstellations: ConstellationKey[];
-  freqGHz: Record<ConstellationKey, number>;
+  freqGHz: number;
 }
 
 export type WorkerInMessage =
