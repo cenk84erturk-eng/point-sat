@@ -140,6 +140,9 @@ export function PassCharts({ pass, freqGHz }: Props) {
     return (dopplerPpm[i + 1] - dopplerPpm[i - 1]) / ((times[i + 1] - times[i - 1]) || 1)
   })
 
+  const elevations = samples.map(s => s.el)
+  const azimuths   = samples.map(s => s.az)
+
   return (
     <div className="pass-charts">
       <div className="pass-charts-header">
@@ -167,6 +170,14 @@ export function PassCharts({ pass, freqGHz }: Props) {
         <div className="pass-chart-wrap pass-chart-wrap--roc">
           <LineChart label="Doppler rate" unit="ppm/s"
             values={dopplerRoc} times={times} color={color} />
+        </div>
+        <div className="pass-chart-wrap pass-chart-wrap--last">
+          <LineChart label="Elevation" unit="°"
+            values={elevations} times={times} color={color} />
+        </div>
+        <div className="pass-chart-wrap pass-chart-wrap--last">
+          <LineChart label="Azimuth" unit="°"
+            values={azimuths} times={times} color={color} />
         </div>
       </div>
     </div>

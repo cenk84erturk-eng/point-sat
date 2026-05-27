@@ -340,12 +340,12 @@ tbody td {
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-.pass-chart-wrap:nth-child(2),
-.pass-chart-wrap:nth-child(4) {
+/* right column: no right border */
+.pass-chart-wrap:nth-child(even) {
   border-right: none;
 }
-.pass-chart-wrap:nth-child(3),
-.pass-chart-wrap:nth-child(4) {
+/* last row: no bottom border */
+.pass-chart-wrap--last {
   border-bottom: none;
 }
 .pass-chart-wrap--roc {
