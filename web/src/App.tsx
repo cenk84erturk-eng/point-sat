@@ -109,6 +109,7 @@ export default function App() {
           onSelectPass={setSelectedPassId}
           selectedPass={selectedPass}
           nowMs={nowMs}
+          minElDeg={settings.minElDeg}
         />
         <SkyView
           passes={passes}

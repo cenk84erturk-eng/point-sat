@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, Circle, CircleMarker, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, Polygon, CircleMarker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { Pass, Station } from '../types'
@@ -17,6 +17,25 @@ const CONSTELLATION_COLORS: Record<string, string> = {
   starlink: '#4c9eff',
   oneweb:   '#ff8c42',
   kuiper:   '#a855f7',
+}
+
+// Compute the geodesic polygon for minimum elevation angle coverage.
+// At elevation ε the Earth central angle ρ satisfies: sin(η)=Re·cos(ε)/(Re+h), ρ=90°-ε-η
+function elevationFootprint(lat: number, lon: number, minElDeg: number, altKm = 550): [number, number][] {
+  const Re = 6371
+  const ε = minElDeg * Math.PI / 180
+  const η = Math.asin(Re * Math.cos(ε) / (Re + altKm))
+  const ρ = Math.PI / 2 - ε - η
+  const φ = lat * Math.PI / 180
+  const λ = lon * Math.PI / 180
+  const pts: [number, number][] = []
+  for (let i = 0; i <= 360; i++) {
+    const θ = (i * Math.PI) / 180
+    const lat2 = Math.asin(Math.sin(φ) * Math.cos(ρ) + Math.cos(φ) * Math.sin(ρ) * Math.cos(θ))
+    const lon2 = λ + Math.atan2(Math.sin(θ) * Math.sin(ρ) * Math.cos(φ), Math.cos(ρ) - Math.sin(φ) * Math.sin(lat2))
+    pts.push([lat2 * 180 / Math.PI, lon2 * 180 / Math.PI])
+  }
+  return pts
 }
 
 function splitAtAntimeridian(pts: [number, number][]): [number, number][][] {
@@ -54,9 +73,10 @@ interface Props {
   onSelectPass: (id: string) => void
   selectedPass: Pass | null
   nowMs: number
+  minElDeg: number
 }
 
-export function MapView({ station, onStationChange, passes, selectedPassId, onSelectPass, selectedPass, nowMs }: Props) {
+export function MapView({ station, onStationChange, passes, selectedPassId, onSelectPass, selectedPass, nowMs, minElDeg }: Props) {
   const handlePlace = (lat: number, lon: number) => {
     onStationChange({ lat: parseFloat(lat.toFixed(4)), lon: parseFloat(lon.toFixed(4)), alt: 0 })
   }
@@ -84,10 +104,9 @@ export function MapView({ station, onStationChange, passes, selectedPassId, onSe
         {station && (
           <>
             <Marker position={[station.lat, station.lon]} />
-            <Circle
-              center={[station.lat, station.lon]}
-              radius={2_700_000}
-              pathOptions={{ color: '#4c9eff', fillColor: 'transparent', weight: 1, opacity: 0.25 }}
+            <Polygon
+              positions={elevationFootprint(station.lat, station.lon, minElDeg)}
+              pathOptions={{ color: '#4c9eff', fillColor: '#4c9eff', fillOpacity: 0.04, weight: 1, opacity: 0.35 }}
             />
           </>
         )}
