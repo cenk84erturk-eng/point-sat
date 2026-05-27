@@ -126,8 +126,8 @@ export function PassCharts({ pass, freqGHz }: Props) {
   const C_KM_S = 299792.458
   const times = samples.map(s => (s.t - aos) / 1000)
   const delays = samples.map(s => s.delayMs)
-  // delay rate of change: d(delay_ms)/dt = rangeRate_km/s / c * 1000  (ms/s)
-  const delayRoc = samples.map(s => (s.rangeRateKms / C_KM_S) * 1000)
+  // delay rate of change: d(delay_ms)/dt converted to µs/s (* 1e6 / c)
+  const delayRoc = samples.map(s => (s.rangeRateKms / C_KM_S) * 1e6)
   // Doppler in ppm = -(rangeRate / c) × 1e6
   const dopplerPpm = samples.map(s => -(s.rangeRateKms / C_KM_S) * 1e6)
   // Doppler rate of change: finite difference of ppm series (ppm/s)
@@ -185,7 +185,7 @@ export function PassCharts({ pass, freqGHz }: Props) {
         </div>
         {/* Row 2 */}
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
-          <LineChart label="Delay rate" unit="ms/s"
+          <LineChart label="Delay rate" unit="µs/s"
             values={delayRoc} times={times} color={color} />
         </div>
         <div className="pass-chart-wrap pass-chart-wrap--last pass-chart-wrap--roc">
