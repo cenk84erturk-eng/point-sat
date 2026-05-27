@@ -15,10 +15,11 @@ export function useTLEs() {
       setLoading(true)
       setError(null)
       try {
+        const bust = `?v=${__BUILD_TIME__}`
         const [starlink, oneweb, kuiper] = await Promise.all([
-          fetch('/data/starlink.json').then(r => r.json()),
-          fetch('/data/oneweb.json').then(r => r.json()),
-          fetch('/data/kuiper.json').then(r => r.json()),
+          fetch(`/data/starlink.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
+          fetch(`/data/oneweb.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
+          fetch(`/data/kuiper.json${bust}`, { cache: 'no-cache' }).then(r => r.json()),
         ])
         if (cancelled) return
         setTles({ starlink, oneweb, kuiper })
