@@ -105,6 +105,7 @@ export function MapView({ station, onStationChange, passes, selectedPassId, onSe
           <>
             <Marker position={[station.lat, station.lon]} />
             <Polygon
+              key={`fp-${station.lat}-${station.lon}-${minElDeg}`}
               positions={elevationFootprint(station.lat, station.lon, minElDeg)}
               pathOptions={{ color: '#4c9eff', fillColor: '#4c9eff', fillOpacity: 0.04, weight: 1, opacity: 0.35 }}
             />
