@@ -7,8 +7,8 @@ const COLORS: Record<string, string> = {
 }
 
 const W = 420
-const H = 130
-const PAD = { top: 10, right: 16, bottom: 28, left: 48 }
+const H = 110
+const PAD = { top: 8, right: 16, bottom: 26, left: 46 }
 const PW = W - PAD.left - PAD.right
 const PH = H - PAD.top - PAD.bottom
 
@@ -123,11 +123,22 @@ export function PassCharts({ pass, freqGHz }: Props) {
   if (samples.length < 2) return null
 
   const color = COLORS[constellation] ?? '#4c9eff'
+  const C_KM_S = 299792.458
   const times = samples.map(s => (s.t - aos) / 1000)
   const delays = samples.map(s => s.delayMs)
-  // Doppler in ppm = (rangeRate / c) × 1e6
-  const C_KM_S = 299792.458
+  // delay rate of change: d(delay_ms)/dt = rangeRate_km/s / c * 1000  (ms/s)
+  const delayRoc = samples.map(s => (s.rangeRateKms / C_KM_S) * 1000)
+  // Doppler in ppm = -(rangeRate / c) × 1e6
   const dopplerPpm = samples.map(s => -(s.rangeRateKms / C_KM_S) * 1e6)
+  // Doppler rate of change: finite difference of ppm series (ppm/s)
+  const dopplerRoc = dopplerPpm.map((_v, i) => {
+    if (i === 0) return (dopplerPpm[1] - dopplerPpm[0]) / ((times[1] - times[0]) || 1)
+    if (i === dopplerPpm.length - 1) {
+      const n = dopplerPpm.length
+      return (dopplerPpm[n - 1] - dopplerPpm[n - 2]) / ((times[n - 1] - times[n - 2]) || 1)
+    }
+    return (dopplerPpm[i + 1] - dopplerPpm[i - 1]) / ((times[i + 1] - times[i - 1]) || 1)
+  })
 
   return (
     <div className="pass-charts">
@@ -140,18 +151,22 @@ export function PassCharts({ pass, freqGHz }: Props) {
           Pass time series · freq {freqGHz} GHz
         </span>
       </div>
-      <div className="pass-charts-row">
+      <div className="pass-charts-grid">
         <div className="pass-chart-wrap">
-          <LineChart
-            label="Delay" unit="ms"
-            values={delays} times={times} color={color}
-          />
+          <LineChart label="Delay" unit="ms"
+            values={delays} times={times} color={color} />
         </div>
         <div className="pass-chart-wrap">
-          <LineChart
-            label="Doppler" unit="ppm"
-            values={dopplerPpm} times={times} color={color}
-          />
+          <LineChart label="Doppler" unit="ppm"
+            values={dopplerPpm} times={times} color={color} />
+        </div>
+        <div className="pass-chart-wrap pass-chart-wrap--roc">
+          <LineChart label="Delay rate" unit="ms/s"
+            values={delayRoc} times={times} color={color} />
+        </div>
+        <div className="pass-chart-wrap pass-chart-wrap--roc">
+          <LineChart label="Doppler rate" unit="ppm/s"
+            values={dopplerRoc} times={times} color={color} />
         </div>
       </div>
     </div>
