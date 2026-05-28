@@ -31,6 +31,13 @@ function fmtUtc(ms: number): string {
   return d.toUTCString().slice(17, 25) + ' UTC'
 }
 
+function fmtPt(ms: number): string {
+  return new Date(ms).toLocaleTimeString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }) + ' PT'
+}
+
 const DEFAULT_SETTINGS: PassSettings = {
   windowMin: 10,
   minElDeg: 30,
@@ -65,6 +72,7 @@ export default function App() {
         </div>
         <div className="header-status">
           <span className="status-chip status-chip--clock">{fmtUtc(nowMs)}</span>
+          <span className="status-chip status-chip--clock">{fmtPt(nowMs)}</span>
 
           {tlesError && <span className="status-chip status-chip--error">TLE error</span>}
 
