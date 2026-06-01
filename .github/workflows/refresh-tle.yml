@@ -27,13 +27,25 @@ jobs:
         run: python scripts/fetch_tles.py
 
       - name: Commit if changed
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add web/public/data/
           if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
             echo "No TLE changes."
           else
             git commit -m "chore: refresh TLEs $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git push
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Trigger Render deploy
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          curl -sf -X POST "https://api.render.com/v1/services/srv-d8atu1pakrks738q5m60/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache":"do_not_clear"}'
+          echo "Render deploy triggered."
