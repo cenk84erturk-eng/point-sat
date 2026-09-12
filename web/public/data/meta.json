@@ -1,4 +1,8 @@
 {
-  "fetchedAt": "2026-09-12T07:33:32Z",
-  "counts": {}
+  "fetchedAt": "2026-09-12T11:51:34Z",
+  "counts": {
+    "starlink": 10712,
+    "oneweb": 651,
+    "kuiper": 391
+  }
 }
